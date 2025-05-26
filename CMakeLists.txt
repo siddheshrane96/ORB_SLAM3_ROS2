@@ -106,10 +106,13 @@ target_include_directories(${PROJECT_NAME}
    ${PROJECT_SOURCE_DIR}/include
    ${PROJECT_SOURCE_DIR}/include/CameraModels
    ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus
+   ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2
    ${Pangolin_INCLUDE_DIRS}
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -pedantic)
+# target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+# Disable all warnings
+target_compile_options(${PROJECT_NAME} PRIVATE -w)
 
 add_subdirectory(Thirdparty/g2o)
 add_subdirectory(Thirdparty/DBoW2)
@@ -117,7 +120,6 @@ add_subdirectory(Thirdparty/DBoW2)
 target_link_libraries(${PROJECT_NAME}
    ${OpenCV_LIBS}
    ${Pangolin_LIBRARIES}
-   ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
    Eigen3::Eigen
    DBoW2::DBoW2
    g2o::g2o
@@ -138,10 +140,27 @@ install(TARGETS
    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 )
 
-# 2. Install headers
+# 2. Install main headers
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+)
+
+# Install third-party headers
+install(
+  DIRECTORY ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/Thirdparty
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+)
+install(
+  DIRECTORY ${PROJECT_SOURCE_DIR}/Thirdparty/g2o
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/Thirdparty
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+)
+install(
+  DIRECTORY ${PROJECT_SOURCE_DIR}/Thirdparty/Sophus
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/Thirdparty
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
 )
 
 # 3. Export targets

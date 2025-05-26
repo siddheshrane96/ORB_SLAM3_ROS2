@@ -1,0 +1,32 @@
+services:
+  orbslam3_ros2:
+    devices:
+      - /dev/dri:/dev/dri
+    build:
+      # The context specifies the directory containing the Dockerfile and other build resources
+      context: .
+      dockerfile: Dockerfile
+    container_name: orbslam3_ros2_dev
+    # useful for applications that need direct access to the host network)
+    network_mode: host
+    # Define environment variables to be passed into the container
+    environment:
+      # Pass the host's DISPLAY environment variable to enable GUI applications
+      - DISPLAY=${DISPLAY}
+      # Disable MIT-SHM extension for X11 to avoid shared memory issues
+      - QT_X11_NO_MITSHM=1
+      - LIBGL_ALWAYS_INDIRECT=1       # ← render over the X protocol
+      - LIBGL_DRI3_DISABLE=1 
+    # MOUNT volumes to share files between host and container.
+    volumes:
+      # Mount the current directory on the host to /ORB_SLAM3 in the container
+      - .:/ORB_SLAM3_ROS2
+      # Mount the X11 socket to enable GUI applications to display on the host
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /home/siddhesh/3dReconstructionPlayground/reconstruction_3d/orbslam_playground:/orbslam_playground
+      - /dev/shm:/dev/shm
+    # Keep the container's standard input open (useful for interactive sessions)
+    stdin_open: true
+    # Allocate a pseudo-TTY for the container (useful for interactive sessions)
+    tty: true
+    shm_size: 2g

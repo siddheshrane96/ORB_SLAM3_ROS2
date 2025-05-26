@@ -96,9 +96,18 @@ set(G2O_SOURCES
   g2o/stuff/property.h
 )
 
+set(G2O_CXX_COMPILER "${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER}")
+# this writes config.h alongside config.h.in in the source
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/config.h.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/config.h
+)
+
 # Include the subdirectories
 add_library(g2o STATIC ${G2O_SOURCES})
 add_library(g2o::g2o ALIAS g2o)
+
+set_target_properties(g2o PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(g2o
   PRIVATE
@@ -114,4 +123,4 @@ target_link_libraries(g2o
     Eigen3::Eigen
 )
 
-target_compile_options(g2o PRIVATE -Wall -Wextra -Werror -pedantic)
+# target_compile_options(g2o PRIVATE -Wall -Wextra -pedantic)

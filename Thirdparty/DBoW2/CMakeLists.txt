@@ -29,6 +29,8 @@ set(SRCS_DUTILS
 
 add_library(DBoW2 STATIC ${SRCS_DBOW2} ${SRCS_DUTILS})
 add_library(DBoW2::DBoW2 ALIAS DBoW2)
+# Needed to avoid -fPIC errors when linking against OpenCV
+set_target_properties(DBoW2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(DBoW2 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(DBoW2 PUBLIC ${OpenCV_LIBS})
