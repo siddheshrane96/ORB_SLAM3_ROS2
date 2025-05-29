@@ -191,7 +191,7 @@ write_basic_package_version_file(
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-
+)
 
 ## Suggested commands to make ros2 specific libraries follow opencv version 4.8
 # 1) Remove the ROS binaries that were built against OpenCV 4.6

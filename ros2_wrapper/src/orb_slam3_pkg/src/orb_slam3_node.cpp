@@ -12,10 +12,21 @@ public:
   OrbSlam3Node()
   : Node("orb_slam3_node")
   {
-    // Use SensorDataQoS for cameras
+    
+    this->declare_parameter<std::string>("vocab_path", "");
+    this->declare_parameter<std::string>("settings_path", "");
+    this->get_parameter("vocab_path", m_vocab_path);
+    this->get_parameter("settings_path", m_setting_path);
+    this->get_parameter("image_topic", m_image_topic);
+
+    m_slam = std::make_unique<ORB_SLAM3::System>(
+      m_vocab_path,
+      m_setting_path,
+      ORB_SLAM3::System::MONOCULAR,
+      true);
+    
     auto qos = rclcpp::SensorDataQoS();
 
-    // 1) Compressed image via image_transport
     m_compressed_img_sub = image_transport::create_subscription(
       this,
       "/camera/image_raw",
@@ -24,7 +35,6 @@ public:
       "compressed",
       qos.get_rmw_qos_profile());
 
-    // 2) Raw image via rclcpp
     m_raw_img_sub = this->create_subscription<sensor_msgs::msg::Image>(
       "/camera/image_raw",
       qos,  // Note: pass the QoS object directly
@@ -35,7 +45,6 @@ public:
   }
 
 private:
-  // Must take ConstSharedPtr for both
   void compressed_img_callback(
     const sensor_msgs::msg::Image::ConstSharedPtr& msg)
   {
@@ -55,13 +64,24 @@ private:
     RCLCPP_INFO(get_logger(),
                 "Got raw image %ux%u",
                 msg->width, msg->height);
-    // … later: feed into ORB_SLAM3 System …
+    cv::Mat frame = cv_bridge::toCvShare(msg, "bgr8")->image;
+    if (frame.empty())
+    {
+        RCLCPP_INFO(get_logger(), "Received empty frame");
+        return;
+    }
+    double ts = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
+    m_slam->TrackMonocular(frame, ts);
   }
 
   image_transport::Subscriber
     m_compressed_img_sub;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr
     m_raw_img_sub;
+    std::string m_vocab_path;
+    std::string m_setting_path;
+    std::string m_image_topic;
+    std::unique_ptr<ORB_SLAM3::System> m_slam;
 };
 
 int main(int argc, char** argv)
