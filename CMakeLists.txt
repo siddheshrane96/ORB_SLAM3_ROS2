@@ -27,8 +27,6 @@ MESSAGE(${OpenCV_VERSION})
 find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 find_package(Pangolin REQUIRED)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-
 add_library(${PROJECT_NAME} SHARED)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
@@ -193,4 +191,35 @@ write_basic_package_version_file(
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
+
+
+## Suggested commands to make ros2 specific libraries follow opencv version 4.8
+# 1) Remove the ROS binaries that were built against OpenCV 4.6
+# RUN apt-get update \
+# && apt-get remove -y \
+#      ros-jazzy-cv-bridge \
+#      ros-jazzy-image-transport \
+#      ros-jazzy-image-common
+
+# # 2) Create an overlay workspace and clone the perception repos
+# ENV ROS_WS=/root/ros2_ws
+# RUN mkdir -p $ROS_WS/src
+# WORKDIR $ROS_WS/src
+# # Grab the vision_opencv stack (which contains cv_bridge, image_geometry, etc)
+# RUN git clone -b ros2 $ROS_DISTRO https://github.com/ros-perception/vision_opencv.git
+# # And the image_common stack (for image_transport plugins)
+# RUN git clone -b ros2 $ROS_DISTRO https://github.com/ros-perception/image_common.git
+
+# # 3) Build everything against your /usr/local OpenCV 4.8
+# WORKDIR $ROS_WS
+# # Ensure CMake will look in /usr/local first
+# ENV OpenCV_DIR=/usr/local/lib/cmake/opencv4
+# RUN source /opt/ros/jazzy/setup.bash \
+# && colcon build --symlink-install \
+#      --cmake-args \
+#        -DCMAKE_BUILD_TYPE=Release \
+#        -DOpenCV_DIR=${OpenCV_DIR}
+
+# # 4) Source the new overlay
+# RUN echo "source $ROS_WS/install/setup.bash" >> ~/.bashrc
+# )
